@@ -1,0 +1,71 @@
+version: '3.1'
+
+services:
+
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  # DataBase
+  # db:
+  #   image: 'mysql'
+  #   restart: always
+  #   container_name: db
+  #   expose:
+  #     - '3306'
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: qwerdsa660
+  #     MYSQL_DATABASE: plamya
+  #     MYSQL_PASSWORD: qwerdsa660
+
+  # FirstService(Auth)
+  # auth-service:
+  #   image: '477227bca8f3'
+  #   container_name: auth-service
+  #   expose:
+  #     - '8080'
+  #   ports:
+  #     - '8080:8080'
+  #   environment:
+  #     DB_USER: root
+  #     DB_PASSWORD: qwerdsa660
+  #     DB_URL: jdbc:mysql://db:3306/plamya
+  #     KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+  #     KAFKA_TOPIC: topic_auth
+  #     KAFKA_CLIENT_ID: auth-service
+  #   depends_on:
+  #     - db
+  #     - kafka
+  # SecondService(event)
+  # consumer:
+  #   image: '79cd9ee5a4f6'
+  #   container_name: consumer
+  #   expose:
+  #     - '8000'
+  #   ports:
+  #     - '8000:8000'
