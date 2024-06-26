@@ -20,26 +20,26 @@ import org.springframework.kafka.core.ProducerFactory;
 public class KafkaConfig {
 
     // Producer configuration
-    @Bean
-    protected ProducerFactory<String, String> producerFactory() {
+    // @Bean
+    // protected ProducerFactory<String, String> producerFactory() {
 
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(props);
-    }
+    //     Map<String, Object> props = new HashMap<>();
+    //     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    //     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    //     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    //     return new DefaultKafkaProducerFactory<>(props);
+    // }
 
-    @Bean
-    protected KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
+    // @Bean
+    // protected KafkaTemplate<String, String> kafkaTemplate() {
+    //     return new KafkaTemplate<>(producerFactory());
+    // }
 
-    @Bean
-    public NewTopic taskTopic() {
-        return TopicBuilder.name("topic-auth")
-                .partitions(1)
-                .replicas(1)
-                .build();
-    }
+    // @Bean
+    // public NewTopic taskTopic() {
+    //     return TopicBuilder.name("topic-auth")
+    //             .partitions(1)
+    //             .replicas(1)
+    //             .build();
+    // }
 }

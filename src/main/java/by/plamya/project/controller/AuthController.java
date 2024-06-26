@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
@@ -55,14 +56,19 @@ public class AuthController {
             return errors;
         }
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.username(),
-                loginRequest.password()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    loginRequest.username(),
+                    loginRequest.password()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
+            return ResponseEntity.ok(new JWTTokenSuccessResponse(true, jwt));
+        } catch (AuthenticationException ex) {
+            return ResponseEntity.ok(new MessageResponse(ex.getMessage()));
 
-        return ResponseEntity.ok(new JWTTokenSuccessResponse(true, jwt));
+        }
+
     }
 
     @PostMapping("/signup")

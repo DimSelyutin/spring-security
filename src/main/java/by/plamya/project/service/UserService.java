@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.UserExistException;
+import by.plamya.project.payload.request.ChangePasswordRequest;
 import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.utils.enums.ERole;
@@ -55,6 +56,7 @@ public class UserService {
         }
     }
 
+    // смена имени и фамилии
     public User updateUser(UserDTO userDTO, Principal principal) {
         User user = getUserByPrincipal(principal);
         user.setUsername(userDTO.getUsername());
@@ -63,6 +65,31 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // смена паролья
+    public User updateUserPassword(ChangePasswordRequest changePasswordRequest, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        String oldPassword = changePasswordRequest.oldPassword();
+        String newPassword = changePasswordRequest.password();
+
+        if (!bCryptPasswordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid old password!");
+        }
+        if (!bCryptPasswordEncoder.matches(newPassword, user.getPassword())) {
+            throw new RuntimeException("The new password is similar to the old one!");
+        }
+        String hashedNewPassword = bCryptPasswordEncoder.encode(newPassword);
+        user.setPassword(hashedNewPassword);
+        try {
+            LOG.info("Update user password with email: " + user.getEmail());
+            return userRepository.save(user);
+        } catch (Exception e) {
+            LOG.error("Error during change pass", e);
+            throw new RuntimeException("User could not be saved. Please try again.");
+        }
+
+    }
+
+    // получение пользователя из принципал
     public User getCurrentUser(Principal principal) {
         LOG.info("ogj in Principal: {}", principal);
         User user = getUserByPrincipal(principal);
@@ -71,6 +98,7 @@ public class UserService {
         return user;
     }
 
+    // получение пользователя по id
     public User getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -79,6 +107,12 @@ public class UserService {
 
         return user;
     }
+
+    /**
+     * 
+     * Utils
+     * 
+     **/
 
     private void validateUserData(SignupRequest signupRequest) {
         if (userRepository.existsByUsername(signupRequest.username())) {

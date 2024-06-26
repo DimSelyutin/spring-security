@@ -9,8 +9,19 @@ import jakarta.validation.constraints.Size;
 
 @PasswordMatches
 public record SignupRequest(
-        @Email(message = "Здесь должен быть Email") @NotBlank(message = "Это поле обязательно") @ValidEmail String email,
-        @NotEmpty(message = "Вы пропустили Имя") String lastname,
-        @NotEmpty(message = "Вы пропустили Логин") String username,
-        @NotEmpty(message = "Вы пропустили Пароль") @Size(min = 6) String password, String confirmPassword) {
+                @Email(message = "Здесь должен быть Email") @NotBlank(message = "Это поле обязательно") @ValidEmail String email,
+                @NotEmpty(message = "Вы пропустили Имя") String lastname,
+                @NotEmpty(message = "Вы пропустили Логин") String username,
+                @NotEmpty(message = "Вы пропустили Пароль") @Size(min = 6) String password, String confirmPassword)
+                implements PasswordMatchable {
+
+        @Override
+        public String getPassword() {
+                return password != null ? password : "";
+        }
+
+        @Override
+        public String getConfirmPassword() {
+                return confirmPassword != null ? confirmPassword : "";
+        }
 }
