@@ -1,7 +1,6 @@
 package by.plamya.project.controller;
 
 import java.security.Principal;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.User;
 import by.plamya.project.facade.UserFacade;
+import by.plamya.project.payload.request.ChangePasswordRequest;
+import by.plamya.project.payload.response.MessageResponse;
 import by.plamya.project.service.UserService;
 import by.plamya.project.utils.validations.ResponseErrorValidator;
 import jakarta.validation.Valid;
@@ -34,12 +34,13 @@ public class UserController {
     @Autowired
     private UserFacade userFacade;
     @Autowired
-    private ResponseErrorValidator responseErrorValidation;
+    private ResponseErrorValidator responseErrorValidator;
+
     public static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
 
     @GetMapping("/")
     public ResponseEntity<UserDTO> getCurrentUser(Principal principal) {
-      
+
         User user = userService.getCurrentUser(principal);
         UserDTO userDTO = userFacade.userToUserDTO(user);
 
@@ -57,7 +58,7 @@ public class UserController {
     @PostMapping("/update")
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult,
             Principal principal) {
-        ResponseEntity<Object> errors = responseErrorValidation.mapValidationService(bindingResult);
+        ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);
         if (!ObjectUtils.isEmpty(errors))
             return errors;
 
@@ -66,5 +67,39 @@ public class UserController {
         UserDTO userUpdated = userFacade.userToUserDTO(user);
         return new ResponseEntity<>(userUpdated, HttpStatus.OK);
     }
+
+    @PostMapping("/update/password")
+    public ResponseEntity<Object> updateUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+            BindingResult bindingResult,
+            Principal principal) {
+        ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);
+        if (!ObjectUtils.isEmpty(errors)) {
+            return errors;
+        }
+        try {
+            userService.updateUserPassword(changePasswordRequest, principal);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.ok(new MessageResponse(ex.getMessage()));
+
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Your password changed successful!"));
+
+    }
+
+    // @GetMapping("/changePassword")
+    // public String redirectChangePasswordPage(Locale locale, Model model,
+    // @RequestParam("token") String token) {
+
+    // String result = userService.validatePasswordResetToken(token);
+    // if (result != null) {
+    // String message = messages.getMessage("auth.message." + result, null, locale);
+    // return "redirect:/login.html?lang="
+    // + locale.getLanguage() + "&message=" + message;
+    // } else {
+    // model.addAttribute("token", token);
+    // return "redirect:/updatePassword.html?lang=" + locale.getLanguage();
+    // }
+    // }
 
 }
