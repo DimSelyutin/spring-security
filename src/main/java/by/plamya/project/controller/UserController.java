@@ -1,7 +1,6 @@
 package by.plamya.project.controller;
 
 import java.security.Principal;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.User;
-import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.ChangePasswordRequest;
 import by.plamya.project.payload.response.MessageResponse;
@@ -38,6 +35,7 @@ public class UserController {
     private UserFacade userFacade;
     @Autowired
     private ResponseErrorValidator responseErrorValidator;
+
     public static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
 
     @GetMapping("/")
@@ -89,6 +87,19 @@ public class UserController {
 
     }
 
-    
+    // @GetMapping("/changePassword")
+    // public String redirectChangePasswordPage(Locale locale, Model model,
+    // @RequestParam("token") String token) {
+
+    // String result = userService.validatePasswordResetToken(token);
+    // if (result != null) {
+    // String message = messages.getMessage("auth.message." + result, null, locale);
+    // return "redirect:/login.html?lang="
+    // + locale.getLanguage() + "&message=" + message;
+    // } else {
+    // model.addAttribute("token", token);
+    // return "redirect:/updatePassword.html?lang=" + locale.getLanguage();
+    // }
+    // }
 
 }
