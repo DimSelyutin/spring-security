@@ -1,5 +1,6 @@
 package by.plamya.project.controller;
 
+import java.security.Principal;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ import by.plamya.project.service.UserService;
 import by.plamya.project.utils.constants.SecurityConstants;
 import by.plamya.project.utils.validations.ResponseErrorValidator;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequestMapping("api/auth")
@@ -72,8 +75,11 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     loginRequest.username(),
                     loginRequest.password()));
+                    
+            User user = userService.getCurrentUser(authentication);
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(authentication);
+            String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(user);
 
             return ResponseEntity.ok(new JWTTokenSuccessResponse(true, jwt));
         } catch (AuthenticationException ex) {

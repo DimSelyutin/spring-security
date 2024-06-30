@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import com.google.gson.Gson;
 import by.plamya.project.payload.response.InvalidLoginResponse;
 import by.plamya.project.utils.constants.SecurityConstants;
 import jakarta.servlet.ServletException;
@@ -20,7 +19,7 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
         InvalidLoginResponse loginResponse = new InvalidLoginResponse();
-        String jsonLoginResponse = new Gson().toJson(loginResponse);
+        // String jsonLoginResponse = new Gson().toJson(loginResponse);
 
         response.setContentType(SecurityConstants.CONTENT_TYPE);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());// 401

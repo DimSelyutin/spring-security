@@ -1,7 +1,6 @@
 package by.plamya.project.security;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +38,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             // Извлечение JWT токена из запроса
             String jwt = getJWTFromRequest(request);
             // Проверка и валидация JWT токена
-
             if (jwt != null && jwtTokenProvider.validateToken(jwt)) {
+
                 Long userId = jwtTokenProvider.getUserIdFromToken(jwt);
 
                 User userDetails = customUserDetailsService.loadUserById(userId);
-
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 

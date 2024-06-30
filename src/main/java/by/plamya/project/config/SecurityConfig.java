@@ -13,16 +13,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
+import by.plamya.project.security.oauth.OAuth2SuccessHandler;
 import by.plamya.project.service.CustomUserDetailsService;
 
 @Configuration
@@ -38,6 +35,10 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
     // Configuring HttpSecurity
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -45,12 +46,13 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/api/auth/**", "/oauth2/**").permitAll();
+                    auth.anyRequest().authenticated();
+                })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
                         jwtAuthenticationEntryPoint))
-                .oauth2Client(a -> clientRepository())
+                .oauth2Login(auth -> auth.successHandler(oAuth2SuccessHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authenticationProvider(authenticationProvider())
@@ -83,20 +85,21 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    protected ClientRegistrationRepository clientRepository() {
+    // @Bean
+    // protected ClientRegistrationRepository clientRepository() {
 
-        ClientRegistration githubRegistration = CommonOAuth2Provider.GITHUB.getBuilder("github")
-                .clientId("id")
-                .clientSecret("secret")
-                .build();
+    // ClientRegistration githubRegistration =
+    // CommonOAuth2Provider.GOOGLE.getBuilder("google")
+    // .clientId("id")
+    // .clientSecret("secret")
+    // .build();
 
-        // ClientRegistration facebookRegistration =
-        // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
-        // .clientId("id")
-        // .clientSecret("secret")
-        // .build();
+    // // ClientRegistration facebookRegistration =
+    // // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
+    // // .clientId("id")
+    // // .clientSecret("secret")
+    // // .build();
 
-        return new InMemoryClientRegistrationRepository(githubRegistration);
-    }
+    // return new InMemoryClientRegistrationRepository(githubRegistration);
+    // }
 }

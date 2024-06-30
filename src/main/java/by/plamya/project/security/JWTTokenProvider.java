@@ -17,15 +17,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-import java.util.Optional;
-
 @Component
 public class JWTTokenProvider {
     public static final Logger LOG = LoggerFactory.getLogger(JWTTokenProvider.class);
 
     // Метод для генерации JWT токена на основе аутентификации пользователя
-    public String generateToken(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public String generateToken(User user) {
+
+        // User user = (User) authentication.getPrincipal();
+        LOG.info(user.toString());
         Date now = new Date(System.currentTimeMillis());
         Date expiryDate = new Date(now.getTime() + SecurityConstants.EXPIRATION_TIME);
 
@@ -33,9 +33,9 @@ public class JWTTokenProvider {
 
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("id", userId);
-        claimsMap.put("username", user.getUsername());
-        claimsMap.put("lastname", user.getLastname());
         claimsMap.put("email", user.getEmail());
+        // claimsMap.put("lastname", user.getLastname());
+        claimsMap.put("username", user.getUsername());
 
         return Jwts.builder()
                 .setSubject(userId)
