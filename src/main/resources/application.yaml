@@ -1,6 +1,8 @@
-# spring:
-#   application:
-#     name: habr-spring-security-6
+server:
+  port: 8080
+spring:
+  application:
+    name: protea-project
 #   datasource:
 #     url: jdbc:mysql://localhost:3306/plamya?useSSL=false # или ссылка для любой другой реляционной базы данных
 #     username: root # поменяйте если не совпадает с вашим
@@ -18,17 +20,14 @@
 #     redis:
 #       host: localhost
 #       port: 6379
-#   security:
-#     oauth2:
-#       client:
-#         registration:
-#           github:
-#             provider: github
-#             client-id: ${GITHUB_CLIENT_ID}
-#             client-secret: ${GITHUB_CLIENT_SECRET}
-#             scope:
-#               - user:email
-#               - read:user
-#         provider:
-#           github:
-#             user-name-attribute: login
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 247464265015-astrh9vll11l22scpds7rdn6q8b8bbo7.apps.googleusercontent.com
+            client-secret: RZptmh1c6LEfNhYHDLqGLqAJ
+          scope: email, profile
+        # provider:
+        #   github:
+        #     user-name-attribute: login

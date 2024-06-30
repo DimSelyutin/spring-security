@@ -1,13 +1,6 @@
 package by.plamya.project.service;
 
 import java.security.Principal;
-
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +83,7 @@ public class UserService {
      */
     public User getUserByPasswordResetToken(String token) {
         PasswordResetToken user = passwordTokenRepository.findByToken(token)
-                .orElseThrow(() -> new ResetTokenException("Token not found"));
+                .orElseThrow(() -> new ResetTokenException(TOKEN_NOT_FOUND));
 
         return user.getUser();
     }
@@ -120,7 +113,7 @@ public class UserService {
     public void changeUserPassword(User user, String newPassword) {
         String hashedNewPassword = bCryptPasswordEncoder.encode(newPassword);
         if (bCryptPasswordEncoder.matches(user.getPassword(), hashedNewPassword)) {
-            throw new RuntimeException("The new password is similar to the old one!");
+            throw new RuntimeException("New password is similar to the old one!");
         }
         user.setPassword(hashedNewPassword);
         saveUser(user);
