@@ -15,7 +15,7 @@ public class OAuth2Config {
 
     @Bean
     protected ClientRegistrationRepository clientRegistrationRepository() {
-        return new InMemoryClientRegistrationRepository(this.googleClientRegistration());
+        return new InMemoryClientRegistrationRepository(googleClientRegistration());
     }
 
     private ClientRegistration googleClientRegistration() {
