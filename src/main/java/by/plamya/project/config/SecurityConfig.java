@@ -13,7 +13,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -34,7 +38,6 @@ public class SecurityConfig {
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
-
 
     @Autowired
     private OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -88,18 +91,17 @@ public class SecurityConfig {
     // @Bean
     // protected ClientRegistrationRepository clientRepository() {
 
-    // ClientRegistration githubRegistration =
-    // CommonOAuth2Provider.GOOGLE.getBuilder("google")
-    // .clientId("id")
-    // .clientSecret("secret")
-    // .build();
+    //     ClientRegistration googleRegistration = CommonOAuth2Provider.GOOGLE.getBuilder("google")
+    //             .clientId("id")
+    //             .clientSecret("secret")
+    //             .build();
 
-    // // ClientRegistration facebookRegistration =
-    // // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
-    // // .clientId("id")
-    // // .clientSecret("secret")
-    // // .build();
+    //     // ClientRegistration facebookRegistration =
+    //     // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
+    //     // .clientId("id")
+    //     // .clientSecret("secret")
+    //     // .build();
 
-    // return new InMemoryClientRegistrationRepository(githubRegistration);
+    //     return new InMemoryClientRegistrationRepository(googleRegistration);
     // }
 }
