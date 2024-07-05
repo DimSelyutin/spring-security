@@ -11,13 +11,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-
 public class JWTTokenProviderTest {
 
-    // Тест генерации JWT токена
+    @DisplayName("Тест генерации JWT токена")
     // @Disabled
     @Test
     public void generateTokenTest() {
@@ -35,7 +35,8 @@ public class JWTTokenProviderTest {
         assertNotNull(token); // Проверка, что токен сгенерирован успешно
     }
 
-    // Тест валидации токена
+    @DisplayName("Тест валидации токена")
+
     // @Disabled
     @Test
     public void validateTokenTest() {
@@ -51,7 +52,7 @@ public class JWTTokenProviderTest {
         assertTrue(tokenProvider.validateToken(validToken)); // Проверка на успешную валидацию токена
     }
 
-    // Тест извлечения идентификатора пользователя из токена
+    @DisplayName("Извлечения ID пользователя из токена")
     // @Disabled
     @Test
     public void getUserIdFromTokenTest() {
@@ -70,6 +71,7 @@ public class JWTTokenProviderTest {
         assertEquals(123456L, userId); // Проверка успешного извлечения идентификатора
     }
 
+    @DisplayName("Отправка истекшего токена")
     @Test
     public void testExpiredToken() {
         // Подготовка данных для теста
