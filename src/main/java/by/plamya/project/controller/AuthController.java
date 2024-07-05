@@ -1,7 +1,9 @@
 package by.plamya.project.controller;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.payload.response.JWTTokenSuccessResponse;
 import by.plamya.project.payload.response.MessageResponse;
 import by.plamya.project.security.JWTTokenProvider;
+import by.plamya.project.service.AuthenticationService;
 import by.plamya.project.service.ResetTokenService;
 import by.plamya.project.service.UserService;
 import by.plamya.project.utils.constants.SecurityConstants;
@@ -58,10 +61,7 @@ public class AuthController {
     private ResetTokenService resetTokenService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JWTTokenProvider jwtTokenProvider;
+    private AuthenticationService authenticationService;
 
     @PostMapping("/signin")
     public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
@@ -72,19 +72,10 @@ public class AuthController {
         }
 
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    loginRequest.username(),
-                    loginRequest.password()));
-                    
-            User user = userService.getCurrentUser(authentication);
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = SecurityConstants.TOKEN_PREFIX + jwtTokenProvider.generateToken(user);
-
-            return ResponseEntity.ok(new JWTTokenSuccessResponse(true, jwt));
+            Map<String, Object> response = authenticationService.login(loginRequest);
+            return ResponseEntity.ok(response);
         } catch (AuthenticationException ex) {
             return ResponseEntity.ok(new MessageResponse(ex.getMessage()));
-
         }
 
     }
@@ -100,7 +91,7 @@ public class AuthController {
         }
 
         try {
-            userService.createUser(signupRequest);
+            authenticationService.registerUser(signupRequest);
         } catch (UserExistException ex) {
             return ResponseEntity.ok(new MessageResponse(ex.getMessage()));
 

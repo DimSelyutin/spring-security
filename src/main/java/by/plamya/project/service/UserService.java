@@ -9,7 +9,6 @@ import by.plamya.project.payload.request.ChangePasswordRequest;
 import by.plamya.project.payload.request.SignupRequest;
 
 public interface UserService {
-    User createUser(SignupRequest signupRequest);
 
     User updateUser(UserDTO userDTO, Principal principal);
 

@@ -42,28 +42,7 @@ public class UserServiceImpl implements UserService {
         this.passwordTokenRepository = passwordTokenRepository;
     }
 
-    /**
-     * Создает нового пользователя на основе данных из запроса.
-     *
-     * @param signupRequest данные для создания нового пользователя
-     * @return созданный пользователь
-     * @throws UserExistException если пользователь с таким username или email уже
-     *                            существует
-     */
-    @Transactional
-    public User createUser(SignupRequest signupRequest) {
-        validateUserData(signupRequest);
-
-        User user = mapSignupRequestToUser(signupRequest);
-
-        try {
-            LOG.info("Saving user with email: " + user.getEmail());
-            return userRepository.save(user);
-        } catch (Exception e) {
-            LOG.error("Error during registration", e);
-            throw new UserExistException("User could not be saved. Please try again.");
-        }
-    }
+    
 
     /**
      * Updates the username and lastname of the current user.
@@ -158,14 +137,7 @@ public class UserServiceImpl implements UserService {
     /*
      * Utility methods
      */
-    private void validateUserData(SignupRequest signupRequest) {
-        if (userRepository.existsByUsername(signupRequest.username())) {
-            throw new UserExistException(USER_USERNAME_EXISTS + signupRequest.username());
-        }
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(USER_EMAIL_EXISTS + signupRequest.email());
-        }
-    }
+
 
     private User getUserByPrincipal(Principal principal) {
         String username = principal.getName();
@@ -198,17 +170,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User mapSignupRequestToUser(SignupRequest signupRequest) {
-        User user = new User();
-        user.setEmail(signupRequest.email());
-        user.setUsername(signupRequest.username());
-        user.setLastname(signupRequest.lastname());
-        user.setPassword(bCryptPasswordEncoder.encode(signupRequest.password()));
-        user.getRoles().add(ERole.ROLE_USER);
-        return user;
-    }
 
-    // -----------------------------------------------
 
     // -----------------------------------------------
 }

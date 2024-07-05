@@ -20,7 +20,10 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
-public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2SuccessHandler
+extends SimpleUrlAuthenticationSuccessHandler
+
+{
 
     @Autowired
     private JWTTokenProvider jwtProvider;
@@ -28,7 +31,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Autowired
     private UserRepository userRepository;
 
-    @Override
+    // @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException {

@@ -41,6 +41,8 @@ public class SecurityConfig {
 
     @Autowired
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
 
     // Configuring HttpSecurity
     @Bean
@@ -55,7 +57,7 @@ public class SecurityConfig {
                 })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
                         jwtAuthenticationEntryPoint))
-                .oauth2Login(auth -> auth.successHandler(oAuth2SuccessHandler))
+                .oauth2Login(auth -> auth.clientRegistrationRepository(clientRegistrationRepository).successHandler(oAuth2SuccessHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authenticationProvider(authenticationProvider())
@@ -88,20 +90,4 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // @Bean
-    // protected ClientRegistrationRepository clientRepository() {
-
-    //     ClientRegistration googleRegistration = CommonOAuth2Provider.GOOGLE.getBuilder("google")
-    //             .clientId("id")
-    //             .clientSecret("secret")
-    //             .build();
-
-    //     // ClientRegistration facebookRegistration =
-    //     // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
-    //     // .clientId("id")
-    //     // .clientSecret("secret")
-    //     // .build();
-
-    //     return new InMemoryClientRegistrationRepository(googleRegistration);
-    // }
 }
