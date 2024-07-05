@@ -1,4 +1,4 @@
-package by.plamya.project.controller.advice;
+package by.plamya.project.exceptions.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
