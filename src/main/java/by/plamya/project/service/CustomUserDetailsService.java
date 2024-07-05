@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import by.plamya.project.entity.User;
-import by.plamya.project.entity.UserPrincipal;
 import by.plamya.project.repository.UserRepository;
 
 @Service
@@ -21,14 +20,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем не найден!" + username));
-        return build(user);
-    }
+    // @Override
+    // public UserDetails loadUserByUsername(String username) {
+    // User user = userRepository.findByUsername(username)
+    // .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем
+    // не найден!" + username));
+    // return build(user);
+    // }
 
-    public UserDetails loadUserByEmail(String email) {
+    @Override
+    public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем не найден!" + email));
         return build(user);
