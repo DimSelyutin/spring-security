@@ -28,15 +28,30 @@ public class User implements UserDetails {
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
 
-    @Column(unique = true, updatable = false)
-    private String username;
+    @JsonIgnore
+    @Column(length = 3000)
+    private String password;
+
+    @Column(nullable = true, updatable = true)
+    private String firstname;
 
     @Column(nullable = true, updatable = true)
     private String lastname;
 
-    @JsonIgnore
-    @Column(length = 3000)
-    private String password;
+    @Column(nullable = false, updatable = true)
+    private String phone;
+
+    @Column(nullable = true, updatable = true)
+    private String address;
+
+    private int active;
+
+    private int emailVerify;
+
+
+    @Column(updatable = true)
+    private String photoLink;
+
 
     @ElementCollection(targetClass = ERole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
@@ -48,15 +63,6 @@ public class User implements UserDetails {
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
-
-    public User(Long id, String email, String username, String password,
-            Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
-        this.email = email;
-        this.username = username;
-        this.password = password;
-        this.authorities = authorities;
-    }
 
     public User() {
     }
@@ -92,6 +98,11 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
 }

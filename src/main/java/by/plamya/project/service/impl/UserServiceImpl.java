@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
      */
     public User updateUser(UserDTO userDTO, Principal principal) {
         User user = getUserByPrincipal(principal);
-        user.setUsername(userDTO.getUsername());
+        user.setFirstname(userDTO.getUsername());
         user.setLastname(userDTO.getLastname());
 
         return userRepository.save(user);
@@ -140,9 +140,9 @@ public class UserServiceImpl implements UserService {
 
 
     private User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND + username));
+        String email = principal.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND + email));
     }
 
     private void initializeRoles(User user) {

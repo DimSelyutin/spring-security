@@ -1,5 +1,6 @@
 package by.plamya.project.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -10,11 +11,16 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 
+import by.plamya.project.security.oauth.OAuth2SuccessHandler;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 public class OAuth2Config {
 
     @Bean
     protected ClientRegistrationRepository clientRegistrationRepository() {
+        log.info("Creating oauth bean...");
         return new InMemoryClientRegistrationRepository(googleClientRegistration());
     }
 
@@ -34,4 +40,7 @@ public class OAuth2Config {
                 .clientName("Google")
                 .build();
     }
+
+    
+
 }

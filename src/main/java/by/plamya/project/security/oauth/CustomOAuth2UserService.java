@@ -1,6 +1,7 @@
 package by.plamya.project.security.oauth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -12,6 +13,8 @@ import by.plamya.project.entity.User;
 import by.plamya.project.entity.UserPrincipal;
 import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.repository.UserRepository;
+import by.plamya.project.service.AuthenticationService;
+import by.plamya.project.service.UserService;
 import by.plamya.project.utils.enums.ERole;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,17 +24,15 @@ import java.util.Collections;
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    // @Lazy private final AuthenticationService authenticationService;
-    // private final UserService userService;
     @Autowired
     private UserRepository userRepository;
 
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // String provider = userRequest.getClientRegistration().getRegistrationId();
-        // OAuth2User oAuth2User = super.loadUser(userRequest);
-        // OAuth2UserInfo oAuth2UserInfo = OAuth2UserFactory.getOAuth2UserInfo(provider,
-        // oAuth2User.getAttributes());
+        String provider = userRequest.getClientRegistration().getRegistrationId();
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
         // User user = userService.getUserInfo(oAuth2UserInfo.getEmail());
 
         // if (user == null) {
@@ -41,14 +42,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // oAuth2UserInfo);
         // }
         // return UserPrincipal.create(user, oAuth2User.getAttributes());
+        log.info("Provider:{}", provider);
+        log.info("oAuth2User:{}", oAuth2User);
+
         return null;
     }
 
     @Transactional
-    public User registerOauth2User(UserPrincipal oAuth2UserInfo) {
+    public User registerOauth2User(UserPrincipal userPrincipal) {
         User user = new User();
-        user.setEmail(oAuth2UserInfo.getEmail());
-        user.setUsername(oAuth2UserInfo.getUsername());
+        user.setEmail(userPrincipal.getEmail());
+        user.setFirstname(userPrincipal.getUsername());
 
         user.setRoles(Collections.singleton(ERole.ROLE_USER));
         try {

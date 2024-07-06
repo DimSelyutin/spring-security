@@ -20,14 +20,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    // @Override
-    // public UserDetails loadUserByUsername(String username) {
-    // User user = userRepository.findByUsername(username)
-    // .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем
-    // не найден!" + username));
-    // return build(user);
-    // }
-
     @Override
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email)
@@ -44,7 +36,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toList());
 
-        return new User(user.getId(), user.getEmail(), user.getUsername(), user.getPassword(), authorities);
+        return new User(user.getId(), user.getEmail(), user.getPassword(), user.getFirstname(), user.getLastname(),
+                user.getPhone(), user.getAddress(), user.getActive(), user.getEmailVerify(), user.getPhotoLink(),
+                user.getRoles(), user.getCreatedTime(), authorities);
 
     }
 

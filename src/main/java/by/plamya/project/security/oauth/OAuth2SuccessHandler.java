@@ -1,79 +1,78 @@
 package by.plamya.project.security.oauth;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import by.plamya.project.entity.User;
-import by.plamya.project.payload.response.JWTTokenSuccessResponse;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.security.JWTTokenProvider;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.Optional;
 
+@Slf4j
 @Component
 public class OAuth2SuccessHandler
-extends SimpleUrlAuthenticationSuccessHandler
+        extends SimpleUrlAuthenticationSuccessHandler
 
 {
 
-    @Autowired
     private JWTTokenProvider jwtProvider;
-
-    private String hostname = "localhost:8080";
-    @Autowired
     private UserRepository userRepository;
 
-    // @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication) throws IOException {
+
+    public OAuth2SuccessHandler(JWTTokenProvider jwtProvider, UserRepository userRepository,
+            CustomOAuth2UserService customOAuth2UserService) {
+        this.jwtProvider = jwtProvider;
+        this.userRepository = userRepository;
         
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+    }
 
-        String email = oAuth2User.getAttribute("email");
-        String username = oAuth2User.getAttribute("name");
-        String lastname = oAuth2User.getAttribute("family_name");
+    private String hostname = "localhost:8080";
 
-        Optional<User> existingUserOptional = userRepository.findByEmail(email);
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException {
+        try {
+            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+            log.info("oAuth obj {}", oAuth2User);
 
-        if (existingUserOptional.isPresent()) {
-            User existingUser = existingUserOptional.get();
-            // Обновление информации о пользователе, если он уже существует
-            existingUser.setUsername(username);
-            existingUser.setLastname(lastname);
-            userRepository.save(existingUser);
-        } else {
-            // Создание нового пользователя, если его нет в базе данных
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setUsername(username);
-            newUser.setLastname(lastname);
-            userRepository.save(newUser);
+            String email = oAuth2User.getAttribute("email");
+            String firstname = oAuth2User.getAttribute("name");
+            String lastname = oAuth2User.getAttribute("family_name");
+            String photo_link = oAuth2User.getAttribute("picture");
+
+            User user = userRepository.findByEmail(email)
+                    .orElseGet(() -> createUser(email, firstname, lastname, photo_link));
+
+            String token = jwtProvider.generateToken(user);
+            String redirectUri = buildRedirectUri(token);
+
+            getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        } catch (Exception e) {
+            log.error("OAuth2 error during authentication: {}", e.getMessage());
         }
+    }
 
-        // Получение пользователя после сохранения
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Failed to save user"));
+    private User createUser(String email, String firstname, String lastname, String photoLink) {
+        User user = new User();
+        user.setEmail(email);
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
+        user.setPhotoLink(photoLink);
+        user.setPhone("+375(99)999-99-99");
+        return userRepository.save(user);
+    }
 
-        // Генерация токена JWT для пользователя
-        String token = jwtProvider.generateToken(user);
-
-        // Генерация URI с токеном для редиректа
-        String uri = UriComponentsBuilder.fromUriString("http://" + hostname + "/oauth2/redirect")
+    private String buildRedirectUri(String token) {
+        return UriComponentsBuilder.fromUriString("http://" + hostname + "/oauth2/redirect")
                 .queryParam("token", token)
-                .build().toUriString();
-
-        // Отправка редиректа с URI содержащим токен
-        getRedirectStrategy().sendRedirect(request, response, uri);
+                .build()
+                .toUriString();
     }
 }

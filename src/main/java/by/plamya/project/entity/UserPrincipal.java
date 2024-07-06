@@ -1,81 +1,61 @@
 package by.plamya.project.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
+@AllArgsConstructor
 public class UserPrincipal implements UserDetails, OAuth2User {
 
-    private final Long id;
-    private final String email;
-    private final String username;
+    private Long id;
+    private String email;
 
-    private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
-    private Map<String, Object> attributes;
+    @JsonIgnore
+    private String password;
 
+
+    private Collection<? extends GrantedAuthority> authorities;
+
+    // private Map<String, Object> attributes;
+
+    // Конструктор для создания UserPrincipal из объекта User
     public static UserPrincipal create(User user) {
-        String userRole = user.getRoles().iterator().next().toString();
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(userRole));
-        return new UserPrincipal(user.getId(), user.getEmail(), user.getUsername(), user.getPassword(), authorities);
-    }
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toList());
 
-    public static UserPrincipal create(User user, Map<String, Object> attributes) {
-        UserPrincipal userPrincipal = UserPrincipal.create(user);
-        userPrincipal.setAttributes(attributes);
-        return userPrincipal;
+        return new UserPrincipal(
+                user.getId(),
+                user.getEmail(),
+                user.getPassword(),
+                authorities);
     }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
+    
     @Override
     public String getName() {
-        return email;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
+        return this.email;
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return this.email;
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public Map<String, Object> getAttributes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAttributes'");
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

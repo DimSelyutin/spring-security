@@ -6,7 +6,7 @@ public interface EmailService {
  
 
     // To send a simple email
-    String sendSimpleMail(EmailDetails details);
+    boolean sendSimpleMail(EmailDetails details);
  
 
     // To send an email with attachment

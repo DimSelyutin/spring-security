@@ -13,39 +13,45 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
 import by.plamya.project.security.oauth.OAuth2SuccessHandler;
 import by.plamya.project.service.CustomUserDetailsService;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, proxyTargetClass = true)
 public class SecurityConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
-    @Autowired
     private JWTAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    @Autowired
     private CustomUserDetailsService customUserDetailsService;
-
-    @Autowired
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    private ClientRegistrationRepository сlientRegistrationRepository;
+
+
+    public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter,
+            JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint, CustomUserDetailsService customUserDetailsService,
+            OAuth2SuccessHandler oAuth2SuccessHandler, ClientRegistrationRepository сlientRegistrationRepository) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.customUserDetailsService = customUserDetailsService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.сlientRegistrationRepository = сlientRegistrationRepository;
+    }
 
     // Configuring HttpSecurity
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        LOG.info("Configuring HttpSecurity...");
+        log.info("Configuring HttpSecurity...");
         httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
@@ -55,13 +61,14 @@ public class SecurityConfig {
                 })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
                         jwtAuthenticationEntryPoint))
-                .oauth2Login(auth -> auth.successHandler(oAuth2SuccessHandler))
+                .oauth2Login(auth -> auth.clientRegistrationRepository(сlientRegistrationRepository)
+                        .successHandler(oAuth2SuccessHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authenticationProvider(authenticationProvider())
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        LOG.info("HttpSecurity configured successfully.");
+        log.info("HttpSecurity configured successfully.");
         return httpSecurity.build();
     }
 
@@ -77,31 +84,32 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(customUserDetailsService);
         authProvider.setPasswordEncoder(bCryptPasswordEncoder());
-        LOG.info("DaoAuthenticationProvider bean created.");
+        log.info("DaoAuthenticationProvider bean created.");
         return authProvider;
     }
 
     // Export AuthenticationManager bean
     @Bean
     protected AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        LOG.info("Creating AuthenticationManager bean.");
+        log.info("Creating AuthenticationManager bean.");
         return config.getAuthenticationManager();
     }
 
     // @Bean
     // protected ClientRegistrationRepository clientRepository() {
 
-    //     ClientRegistration googleRegistration = CommonOAuth2Provider.GOOGLE.getBuilder("google")
-    //             .clientId("id")
-    //             .clientSecret("secret")
-    //             .build();
+    // ClientRegistration googleRegistration =
+    // CommonOAuth2Provider.GOOGLE.getBuilder("google")
+    // .clientId("id")
+    // .clientSecret("secret")
+    // .build();
 
-    //     // ClientRegistration facebookRegistration =
-    //     // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
-    //     // .clientId("id")
-    //     // .clientSecret("secret")
-    //     // .build();
+    // // ClientRegistration facebookRegistration =
+    // // CommonOAuth2Provider.FACEBOOK.getBuilder("facebook")
+    // // .clientId("id")
+    // // .clientSecret("secret")
+    // // .build();
 
-    //     return new InMemoryClientRegistrationRepository(googleRegistration);
+    // return new InMemoryClientRegistrationRepository(googleRegistration);
     // }
 }

@@ -30,9 +30,9 @@ public class ResetTokenService {
     private PasswordTokenRepository passwordTokenRepository;
 
     // восстановление пароля
-    public String generateResetToken(ResetPasswordRequest resetPasswordRequest) {
+    public String generateResetToken(String email) {
 
-        User user = userRepository.findByEmail(resetPasswordRequest.email())
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
 
         Optional<PasswordResetToken> passToken = passwordTokenRepository.findByUserId(user.getId());
