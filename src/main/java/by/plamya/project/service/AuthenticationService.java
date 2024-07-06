@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 
 import by.plamya.project.dto.PasswordDTO;
 import by.plamya.project.entity.User;
-import by.plamya.project.entity.UserPrincipal;
 import by.plamya.project.payload.request.LoginRequest;
 import by.plamya.project.payload.request.SignupRequest;
 

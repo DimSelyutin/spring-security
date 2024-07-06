@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import by.plamya.project.dto.PasswordDTO;
 import by.plamya.project.entity.EmailDetails;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private String hostname = "localhost:8080";
 
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
@@ -104,17 +106,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    private User mapSignupRequestToUser(SignupRequest signupRequest) {
-        User user = new User();
-        user.setEmail(signupRequest.email());
-        user.setFirstname(signupRequest.firstname());
-        user.setLastname(signupRequest.lastname());
-        user.setPhone(signupRequest.phone());
-        user.setPassword(bCryptPasswordEncoder.encode(signupRequest.password()));
-        user.getRoles().add(ERole.ROLE_USER);
-        return user;
-    }
-
     @Override
     public User registerOauth2User(Authentication authentication) {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
@@ -124,21 +115,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String lastname = oAuth2User.getAttribute("family_name");
         String photo_link = oAuth2User.getAttribute("picture");
 
-        Optional<User> existingUserOptional = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> createUser(email, firstname, lastname, photo_link));
 
-        if (existingUserOptional.isPresent()) {
-            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + email);
-        }
-        // Создание нового пользователя, если его нет в базе данных
-        User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setFirstname(firstname);
-        newUser.setLastname(lastname);
-        newUser.setPhotoLink(photo_link);
-        newUser.setPhone("+375(99)999-99-99");
-        userRepository.save(newUser);
+        return user;
 
-        return newUser;
     }
 
     @Override
@@ -173,5 +154,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userService.changeUserPassword(user, passwordDTO.getNewPassword());
         resetTokenService.deleteToken(passwordDTO.getToken());
         return result;
+    }
+
+    private User mapSignupRequestToUser(SignupRequest signupRequest) {
+        User user = new User();
+        user.setEmail(signupRequest.email());
+        user.setFirstname(signupRequest.firstname());
+        user.setLastname(signupRequest.lastname());
+        user.setPhone(signupRequest.phone());
+        user.setPassword(bCryptPasswordEncoder.encode(signupRequest.password()));
+        user.getRoles().add(ERole.ROLE_USER);
+        return user;
+    }
+
+    private User createUser(String email, String firstname, String lastname, String photoLink) {
+        User user = new User();
+        user.setEmail(email);
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
+        user.setPhotoLink(photoLink);
+        user.setPhone("+375(99)999-99-99");
+        user.getRoles().add(ERole.ROLE_USER);
+        return userRepository.save(user);
     }
 }

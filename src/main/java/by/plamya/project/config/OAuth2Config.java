@@ -1,6 +1,6 @@
 package by.plamya.project.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -11,13 +11,15 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 
-import by.plamya.project.security.oauth.OAuth2SuccessHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 public class OAuth2Config {
-
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleId;
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String secret;
     @Bean
     protected ClientRegistrationRepository clientRegistrationRepository() {
         log.info("Creating oauth bean...");
@@ -26,8 +28,8 @@ public class OAuth2Config {
 
     private ClientRegistration googleClientRegistration() {
         return ClientRegistration.withRegistrationId("google")
-                .clientId("63937361072-cfdefikord18lljvcbaohqai5chfup5n.apps.googleusercontent.com")
-                .clientSecret("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")
+                .clientId(googleId)
+                .clientSecret(secret)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
