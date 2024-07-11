@@ -1,40 +1,77 @@
 package by.plamya.project.controller;
 
-import java.security.Principal;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.User;
 import by.plamya.project.facade.UserFacade;
-import by.plamya.project.service.UserService;
-import lombok.extern.slf4j.Slf4j;
+import by.plamya.project.service.AdminUserService;
+import by.plamya.project.utils.validations.ResponseErrorValidator;
+import jakarta.validation.Valid;
 
-@Slf4j
 @RestController
-@RequestMapping("api/admin")
-@CrossOrigin
+@RequestMapping("api/admin/user")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
+    private final AdminUserService adminUserService;
 
-    @Autowired
-    private UserFacade userFacade;
+    private final UserFacade userFacade;
 
-    @GetMapping("/")
-    public ResponseEntity<UserDTO> getCurrentUser(Principal principal) {
+    private final ResponseErrorValidator responseErrorValidator;
 
-        User user = userService.getCurrentUser(principal);
-        UserDTO userDTO = userFacade.userToUserDTO(user);
+    public AdminController(AdminUserService adminUserService, UserFacade userFacade,
+            ResponseErrorValidator responseErrorValidator) {
+        this.adminUserService = adminUserService;
+        this.userFacade = userFacade;
+        this.responseErrorValidator = responseErrorValidator;
+    }
+//TODO admin methods
+    @PostMapping("/update/{id}")
+    public ResponseEntity<Object> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO,
+            BindingResult bindingResult) {
+        ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);
+        if (!ObjectUtils.isEmpty(errors)) {
+            return errors;
+        }
+
+        // User updatedUser = adminUserService.updateUser(id, userDTO);
+
+        // // Преобразовать пользователя в DTO (если необходимо)
+        // UserDTO userUpdated = userFacade.userToUserDTO(updatedUser);
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        adminUserService.deleteUser(id);
+        return new ResponseEntity<>("User with ID " + id + " has been deleted", HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = adminUserService.getUserById(id);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Object> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+        ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);
+        if (!ObjectUtils.isEmpty(errors)) {
+            return errors;
+        }
+
+        // User createdUser = adminUserService.createUser(userDTO);
+
+        // // Преобразовать пользователя в DTO (если необходимо)
+        // UserDTO userCreated = userFacade.userToUserDTO(createdUser);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

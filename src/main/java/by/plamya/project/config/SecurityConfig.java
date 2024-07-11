@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
 import by.plamya.project.security.oauth.OAuth2SuccessHandler;
-import by.plamya.project.service.CustomUserDetailsService;
+import by.plamya.project.service.impl.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

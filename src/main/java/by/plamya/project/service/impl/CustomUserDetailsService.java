@@ -1,4 +1,4 @@
-package by.plamya.project.service;
+package by.plamya.project.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;

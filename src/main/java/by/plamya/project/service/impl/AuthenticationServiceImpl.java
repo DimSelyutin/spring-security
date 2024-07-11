@@ -88,13 +88,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public UserDTO registerUser(SignupRequest signupRequest) {
-        validateUserData(signupRequest);
 
         User user = mapSignupRequestToUser(signupRequest);
 
         try {
             log.info("Saving user with email: " + user.getEmail());
-            return userFacade.userToUserDTO(userRepository.save(user));
+            return userFacade.userToUserDTO(userService.createUser(user));
         } catch (Exception e) {
             log.error("Error during registration", e);
             throw new UserExistException(ResponseConstant.USER_NOT_SAVE.toString());
@@ -110,10 +109,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String lastname = oAuth2User.getAttribute("family_name");
         String photo_link = oAuth2User.getAttribute("picture");
 
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> createUser(email, firstname, lastname, photo_link));
-
-        return user;
+        return userService.createUser(email, firstname, lastname, photo_link);
 
     }
 
@@ -160,25 +156,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPassword(bCryptPasswordEncoder.encode(signupRequest.password()));
         user.getRoles().add(ERole.ROLE_USER);
         return user;
-    }
-
-    private User createUser(String email, String firstname, String lastname, String photoLink) {
-        User user = new User();
-        user.setEmail(email);
-        user.setFirstname(firstname);
-        user.setLastname(lastname);
-        user.setPhotoLink(photoLink);
-        user.setPhone("+375(99)999-99-99");
-        user.getRoles().add(ERole.ROLE_USER);
-        return userRepository.save(user);
-    }
-
-    private void validateUserData(SignupRequest signupRequest) {
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
-        }
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
-        }
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import by.plamya.project.entity.User;
-import by.plamya.project.service.CustomUserDetailsService;
+import by.plamya.project.service.impl.CustomUserDetailsService;
 import by.plamya.project.utils.constants.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
