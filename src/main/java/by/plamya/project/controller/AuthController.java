@@ -25,7 +25,6 @@ import by.plamya.project.payload.response.MessageResponse;
 import by.plamya.project.service.AuthenticationService;
 import by.plamya.project.utils.validations.ResponseErrorValidator;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin
 @RestController

@@ -7,26 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.PasswordResetToken;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.ResetTokenException;
-import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.payload.request.ChangePasswordRequest;
-import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.repository.PasswordTokenRepository;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.service.UserService;
-import by.plamya.project.utils.enums.ERole;
 
 @Service
 public class UserServiceImpl implements UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private static final String USER_EMAIL_EXISTS = "User with this email already exists: ";
-    private static final String USER_USERNAME_EXISTS = "User with this username already exists: ";
     private static final String TOKEN_NOT_FOUND = "Token not found";
     private static final String USERNAME_NOT_FOUND = "Username not found with username ";
 
@@ -110,7 +103,6 @@ public class UserServiceImpl implements UserService {
      * @return the current authenticated user
      */
     public User getCurrentUser(Principal principal) {
-        LOG.info("Log in Principal: {}", principal);
         User user = getUserByPrincipal(principal);
         initializeRoles(user);
 

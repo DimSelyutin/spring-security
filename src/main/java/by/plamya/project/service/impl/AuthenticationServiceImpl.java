@@ -12,14 +12,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import by.plamya.project.dto.PasswordDTO;
+import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.EmailDetails;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.ResetTokenException;
 import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.exceptions.UserWithoutPasswordException;
+import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.LoginRequest;
 import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.repository.UserRepository;
@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private String hostname = "localhost:8080";
 
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
@@ -45,10 +44,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private ResetTokenService resetTokenService;
     private EmailService emailService;
+    private UserFacade userFacade;
 
     public AuthenticationServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository,
             UserService userService, JWTTokenProvider jwtTokenProvider, BCryptPasswordEncoder bCryptPasswordEncoder,
-            ResetTokenService resetTokenService, EmailService emailService) {
+            ResetTokenService resetTokenService, EmailService emailService, UserFacade userFacade) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.userService = userService;
@@ -56,6 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.resetTokenService = resetTokenService;
         this.emailService = emailService;
+        this.userFacade = userFacade;
     }
 
     @Override
@@ -83,26 +84,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public User registerUser(SignupRequest signupRequest) {
+    public UserDTO registerUser(SignupRequest signupRequest) {
         validateUserData(signupRequest);
 
         User user = mapSignupRequestToUser(signupRequest);
 
         try {
             log.info("Saving user with email: " + user.getEmail());
-            return userRepository.save(user);
+            return userFacade.userToUserDTO(userRepository.save(user));
         } catch (Exception e) {
             log.error("Error during registration", e);
             throw new UserExistException(ResponseConstant.USER_NOT_SAVE.toString());
-        }
-    }
-
-    private void validateUserData(SignupRequest signupRequest) {
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
-        }
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
         }
     }
 
@@ -176,5 +168,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPhone("+375(99)999-99-99");
         user.getRoles().add(ERole.ROLE_USER);
         return userRepository.save(user);
+    }
+
+    private void validateUserData(SignupRequest signupRequest) {
+        if (userRepository.existsByEmail(signupRequest.email())) {
+            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
+        }
+        if (userRepository.existsByEmail(signupRequest.email())) {
+            throw new UserExistException(ResponseConstant.USER_EMAIL_EXISTS.toString() + signupRequest.email());
+        }
     }
 }

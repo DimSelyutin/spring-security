@@ -2,6 +2,10 @@ package by.plamya.project.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -19,6 +23,7 @@ import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
 import by.plamya.project.security.oauth.OAuth2SuccessHandler;
 import by.plamya.project.service.CustomUserDetailsService;
+import by.plamya.project.utils.enums.ERole;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -32,7 +37,6 @@ public class SecurityConfig {
     private CustomUserDetailsService customUserDetailsService;
     private OAuth2SuccessHandler oAuth2SuccessHandler;
     private ClientRegistrationRepository сlientRegistrationRepository;
-
 
     public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter,
             JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint, CustomUserDetailsService customUserDetailsService,
@@ -52,7 +56,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> {
+                    
                     auth.requestMatchers("/api/auth/**", "/oauth2/**").permitAll();
+                    auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
@@ -89,6 +95,15 @@ public class SecurityConfig {
     protected AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         log.info("Creating AuthenticationManager bean.");
         return config.getAuthenticationManager();
+    }
+
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        String hierarchy = "ROLE_ADMIN > ROLE_INSTRUCTOR \n ROLE_INSTRUCTOR > ROLE_USER";
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
     }
 
     // @Bean
