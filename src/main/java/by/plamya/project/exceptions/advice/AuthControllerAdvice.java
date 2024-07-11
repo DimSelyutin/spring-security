@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.exceptions.UserNotFoundException;
+import by.plamya.project.exceptions.UserTokenExpiredException;
 import by.plamya.project.payload.response.MessageResponse;
 
 @RestControllerAdvice
@@ -30,5 +31,11 @@ public class AuthControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Object> handleUserNotFoundException(Exception ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(UserTokenExpiredException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Object> userTokenExpiredException(UserTokenExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse(ex.getMessage()));
     }
 }

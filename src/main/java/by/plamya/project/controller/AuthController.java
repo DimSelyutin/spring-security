@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import by.plamya.project.dto.PasswordDTO;
 import by.plamya.project.exceptions.UserExistException;
 import by.plamya.project.exceptions.UserNotFoundException;
+import by.plamya.project.exceptions.UserWithoutPasswordException;
 import by.plamya.project.payload.request.LoginRequest;
 import by.plamya.project.payload.request.ResetPasswordRequest;
 import by.plamya.project.payload.request.SignupRequest;
@@ -44,12 +45,10 @@ public class AuthController {
         ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);
         if (!ObjectUtils.isEmpty(errors))
             return errors;
-
         try {
-
             Map<String, Object> response = authenticationService.login(loginRequest);
             return ResponseEntity.ok(response);
-        } catch (AuthenticationException ex) {
+        } catch (AuthenticationException | UserNotFoundException | UserWithoutPasswordException ex) {
             return ResponseEntity.ok(new MessageResponse(ex.getMessage()));
         }
 

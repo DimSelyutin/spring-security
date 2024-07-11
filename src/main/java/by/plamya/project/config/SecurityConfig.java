@@ -23,7 +23,6 @@ import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
 import by.plamya.project.security.oauth.OAuth2SuccessHandler;
 import by.plamya.project.service.CustomUserDetailsService;
-import by.plamya.project.utils.enums.ERole;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -58,7 +57,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     
                     auth.requestMatchers("/api/auth/**", "/oauth2/**").permitAll();
-                    auth.requestMatchers("/api/admin/**").hasRole("ADMIN");
+                    auth.requestMatchers("/api/admin/**").hasAnyRole("ADMIN",
+                            "INSTRUCTOR");
                     auth.anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
@@ -97,15 +97,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-
-    @Bean
-    public RoleHierarchy roleHierarchy() {
-        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        String hierarchy = "ROLE_ADMIN > ROLE_INSTRUCTOR \n ROLE_INSTRUCTOR > ROLE_USER";
-        roleHierarchy.setHierarchy(hierarchy);
-        return roleHierarchy;
-    }
-
     // @Bean
     // protected ClientRegistrationRepository clientRepository() {
 
@@ -123,4 +114,21 @@ public class SecurityConfig {
 
     // return new InMemoryClientRegistrationRepository(googleRegistration);
     // }
+
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("INSTRUCTOR")
+                .role("INSTRUCTOR").implies("USER")
+                .role("USER").implies("GUEST")
+                .build();
+    }
+
+    // and, if using pre-post method security also add
+    @Bean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setRoleHierarchy(roleHierarchy);
+        return expressionHandler;
+    }
 }

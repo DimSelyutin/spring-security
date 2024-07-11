@@ -18,6 +18,7 @@ import by.plamya.project.entity.EmailDetails;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.ResetTokenException;
 import by.plamya.project.exceptions.UserExistException;
+import by.plamya.project.exceptions.UserNotFoundException;
 import by.plamya.project.exceptions.UserWithoutPasswordException;
 import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.LoginRequest;
@@ -62,12 +63,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public Map<String, Object> login(LoginRequest loginRequest) {
 
-        Optional<User> opUser = userRepository.findByEmail(loginRequest.email());
-
-        if (opUser.get().getPassword() == null) {
-            sendPasswordResetCode(opUser.get().getEmail());
-            throw new UserWithoutPasswordException("Check your email for set password! Email: " + loginRequest.email());
+        User opUser = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        if (opUser.getPassword() == null) {
+            sendPasswordResetCode(opUser.getEmail());
+            throw new UserWithoutPasswordException(
+                    "Check your email for set password! Email: " + loginRequest.email());
         }
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.email(), loginRequest.password()));
         User user = userService.getCurrentUser(authentication);

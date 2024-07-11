@@ -43,6 +43,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 Long userId = jwtTokenProvider.getUserIdFromToken(jwt);
 
                 User userDetails = customUserDetailsService.loadUserById(userId);
+                
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
@@ -51,7 +52,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // Логирование ошибок при установке аутентификации
-            LOG.error("Could not set user authentication: {}", e.getClass());
+            LOG.error("Could not set user authentication: {}", e.getLocalizedMessage());
         }
         // Продолжение цепочки фильтров
         filterChain.doFilter(request, response);

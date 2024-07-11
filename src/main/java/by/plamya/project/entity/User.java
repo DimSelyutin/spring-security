@@ -3,9 +3,12 @@ package by.plamya.project.entity;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,11 +17,13 @@ import by.plamya.project.utils.enums.ERole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@AllArgsConstructor
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
 
     @Id
@@ -48,10 +53,8 @@ public class User implements UserDetails {
 
     private int emailVerify;
 
-
     @Column(updatable = true)
     private String photoLink;
-
 
     @ElementCollection(targetClass = ERole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
@@ -64,12 +67,16 @@ public class User implements UserDetails {
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
-    public User() {
-    }
-
     @PrePersist
     protected void onCreated() {
         this.createdTime = LocalDateTime.now();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toList());
     }
 
     /*

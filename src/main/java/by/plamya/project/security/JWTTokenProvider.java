@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 import by.plamya.project.entity.User;
+import by.plamya.project.exceptions.UserTokenExpiredException;
 import by.plamya.project.utils.constants.SecurityConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,20 +26,13 @@ public class JWTTokenProvider {
     public String generateToken(User user) {
 
         // User user = (User) authentication.getPrincipal();
-        LOG.info(user.toString());
         Date now = new Date(System.currentTimeMillis());
         Date expiryDate = new Date(now.getTime() + SecurityConstants.EXPIRATION_TIME);
 
-        String userId = Long.toString(user.getId());
-
-        Map<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put("id", userId);
-        claimsMap.put("email", user.getEmail());
-        // claimsMap.put("lastname", user.getLastname());
-        claimsMap.put("username", user.getUsername());
+        Map<String, Object> claimsMap = buildClaims(user);
 
         return Jwts.builder()
-                .setSubject(userId)
+                .setSubject(user.getEmail())
                 .addClaims(claimsMap)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -48,12 +42,13 @@ public class JWTTokenProvider {
 
     // Метод для создания утверждений (claims) на основе данных пользователя
     private Map<String, Object> buildClaims(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
-        claims.put("username", user.getUsername());
-        claims.put("email", user.getEmail());
+        Map<String, Object> claimsMap = new HashMap<>();
+        claimsMap.put("id", Long.toString(user.getId()));
+        claimsMap.put("email", user.getEmail());
+        // claimsMap.put("lastname", user.getLastname());
+        claimsMap.put("username", user.getUsername());
 
-        return claims;
+        return claimsMap;
     }
 
     // Метод для проверки валидности JWT токена
@@ -67,7 +62,7 @@ public class JWTTokenProvider {
         } catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException
                 | IllegalArgumentException ex) {
             LOG.error("validateToken exception: {}", ex.getMessage());
-            return false;
+            throw new UserTokenExpiredException("Token expired!");
         }
     }
 
