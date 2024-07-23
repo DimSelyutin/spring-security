@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import by.plamya.project.dto.PasswordDTO;
@@ -28,16 +29,17 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @CrossOrigin
+@RequestMapping("api/auth")
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/auth")
 @PreAuthorize("permitAll()")
 public class AuthController {
 
     private ResponseErrorValidator responseErrorValidator;
     private AuthenticationService authenticationService;
 
-    @PostMapping("/signin")
+    
+    @RequestMapping(value = "/signin", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<Object> authenticateUser(@Valid @RequestBody LoginRequest loginRequest,
             BindingResult bindingResult) {
         ResponseEntity<Object> errors = responseErrorValidator.mapValidationService(bindingResult);

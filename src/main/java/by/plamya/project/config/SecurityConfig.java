@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> {
 
-                    auth.requestMatchers("/api/auth/**", "/oauth2/**").permitAll();
+                    auth.requestMatchers("/api/auth/**", "/oauth2/**","/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
                     auth.requestMatchers("/api/admin/**").hasAnyRole("ADMIN",
                             "INSTRUCTOR");
                     auth.anyRequest().authenticated();
