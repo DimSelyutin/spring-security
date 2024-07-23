@@ -9,11 +9,7 @@ import by.plamya.project.entity.User;
 public class UserFacade {
 
     public UserDTO userToUserDTO(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setLastname(user.getLastname());
-        userDTO.setUsername(user.getUsername());
-        return userDTO;
+        return new UserDTO(user.getId(), user.getFirstname(), user.getLastname(), user.getEmail());
     }
 
 }

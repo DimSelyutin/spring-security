@@ -1,4 +1,4 @@
-package by.plamya.project.service;
+package by.plamya.project.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import by.plamya.project.entity.User;
-import by.plamya.project.entity.UserPrincipal;
 import by.plamya.project.repository.UserRepository;
 
 @Service
@@ -22,17 +21,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем не найден!" + username));
+    public UserDetails loadUserByUsername(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем не найден!" + email));
         return build(user);
     }
-
-    // public User loadUserByEmail(String email) {
-    //     User user = userRepository.findByEmail(email)
-    //             .orElseThrow(() -> new UsernameNotFoundException("Пользователь с таким именем не найден!" + email));
-    //     return build(user);
-    // }
 
     public User loadUserById(Long id) {
         return userRepository.findUserById(id).orElse(null);
@@ -43,7 +36,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toList());
 
-        return new User(user.getId(), user.getEmail(), user.getUsername(), user.getPassword(), authorities);
+        return new User(user.getId(), user.getEmail(), user.getPassword(), user.getFirstname(), user.getLastname(),
+                user.getPhone(), user.getAddress(), user.getActive(), user.getEmailVerify(), user.getPhotoLink(),
+                user.getRoles(), user.getCreatedTime(), authorities);
 
     }
 

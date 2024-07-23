@@ -17,12 +17,18 @@ import org.mockito.Mockito;
 
 public class JWTTokenProviderTest {
 
+    private User user = new User();
+    {
+        user.setId(1L);
+        user.setEmail("test@test.com");
+    }
+
     @DisplayName("Тест генерации JWT токена")
     // @Disabled
     @Test
     public void generateTokenTest() {
         // Подготовка данных для теста
-        User user = new User(1L, "test@test.com", "testuser", "password", null);
+
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(user);
 
@@ -41,7 +47,6 @@ public class JWTTokenProviderTest {
     @Test
     public void validateTokenTest() {
         // Подготовка данных для теста
-        User user = new User(1L, "test@test.com", "testuser", "password", null);
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(user);
         // Создание объекта JWTTokenProvider
@@ -57,7 +62,7 @@ public class JWTTokenProviderTest {
     @Test
     public void getUserIdFromTokenTest() {
         // Подготовка данных для теста
-        User user = new User(123456L, "test@test.com", "testuser", "password", null);
+        user.setId(123456L);
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn(user);
         // Создание объекта JWTTokenProvider

@@ -1,68 +1,46 @@
 package by.plamya.project.service.impl;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import by.plamya.project.dto.UserDTO;
 import by.plamya.project.entity.PasswordResetToken;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.ResetTokenException;
-import by.plamya.project.exceptions.UserExistException;
+import by.plamya.project.exceptions.UserNotFoundException;
+import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.ChangePasswordRequest;
-import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.repository.PasswordTokenRepository;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.service.UserService;
 import by.plamya.project.utils.enums.ERole;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private static final String USER_EMAIL_EXISTS = "User with this email already exists: ";
-    private static final String USER_USERNAME_EXISTS = "User with this username already exists: ";
     private static final String TOKEN_NOT_FOUND = "Token not found";
     private static final String USERNAME_NOT_FOUND = "Username not found with username ";
 
-    private UserRepository userRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private PasswordTokenRepository passwordTokenRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordTokenRepository passwordTokenRepository;
+    private final UserFacade userFacade;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
-            PasswordTokenRepository passwordTokenRepository) {
-        this.userRepository = userRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.passwordTokenRepository = passwordTokenRepository;
-    }
-
-    /**
-     * Создает нового пользователя на основе данных из запроса.
-     *
-     * @param signupRequest данные для создания нового пользователя
-     * @return созданный пользователь
-     * @throws UserExistException если пользователь с таким username или email уже
-     *                            существует
-     */
-    @Transactional
-    public User createUser(SignupRequest signupRequest) {
-        validateUserData(signupRequest);
-
-        User user = mapSignupRequestToUser(signupRequest);
-
-        try {
-            LOG.info("Saving user with email: " + user.getEmail());
-            return userRepository.save(user);
-        } catch (Exception e) {
-            LOG.error("Error during registration", e);
-            throw new UserExistException("User could not be saved. Please try again.");
-        }
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(USERNAME_NOT_FOUND));
     }
 
     /**
@@ -74,7 +52,7 @@ public class UserServiceImpl implements UserService {
      */
     public User updateUser(UserDTO userDTO, Principal principal) {
         User user = getUserByPrincipal(principal);
-        user.setUsername(userDTO.getUsername());
+        user.setFirstname(userDTO.getUsername());
         user.setLastname(userDTO.getLastname());
 
         return userRepository.save(user);
@@ -131,63 +109,105 @@ public class UserServiceImpl implements UserService {
      * @return the current authenticated user
      */
     public User getCurrentUser(Principal principal) {
-        LOG.info("Log in Principal: {}", principal);
         User user = getUserByPrincipal(principal);
         initializeRoles(user);
 
         return user;
     }
 
-    /**
-     * Retrieves a user by their ID.
-     *
-     * @param id the user's ID
-     * @return the retrieved user
-     */
-    public User getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND + id));
+    @Override
+    public User createUser(User user) {
+        // Проверка уникальности email
+        userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким email уже существует"));
 
-        initializeRoles(user);
+        // Хэширование пароля перед сохранением
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        } else {
+            throw new RuntimeException("Пароль не может быть пустым");
+        }
 
-        return user;
+        // Установка стандартной роли, если роли не заданы
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            user.setRoles(Set.of(ERole.ROLE_USER)); // Замените ERole на ваш класс ролей
+        }
+
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при создании пользователя: " + e.getMessage());
+        }
     }
 
-    
+    @Override
+    public List<UserDTO> getAllUsers() {
+        List<UserDTO> users = userRepository.findAll().stream().map(userFacade::userToUserDTO)
+                .collect(Collectors.toList());
 
+        return users;
+    }
+
+    @Override
+    public User createUser(String email, String firstname, String lastname, String photoLink) {
+        // Проверка уникальности email
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким email уже существует"));
+
+        User user = new User();
+        user.setEmail(email);
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
+        user.setPhotoLink(photoLink);
+        user.setPhone("");
+
+        // Установка ролей пользователя
+        user.getRoles().add(ERole.ROLE_USER);
+
+        // Установка дополнительных полей
+        user.setActive(1); // или другое значение в зависимости от логики
+        user.setEmailVerify(0); // или другое значение в зависимости от логики
+        user.setCreatedTime(LocalDateTime.now());
+
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при создании пользователя: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Optional<User> getUserInfo(String email) {
+        return userRepository.findByEmail(email);
+    }
     /*
      * Utility methods
      */
-    private void validateUserData(SignupRequest signupRequest) {
-        if (userRepository.existsByUsername(signupRequest.username())) {
-            throw new UserExistException(USER_USERNAME_EXISTS + signupRequest.username());
-        }
-        if (userRepository.existsByEmail(signupRequest.email())) {
-            throw new UserExistException(USER_EMAIL_EXISTS + signupRequest.email());
-        }
-    }
 
     private User getUserByPrincipal(Principal principal) {
-        String username = principal.getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND + username));
+        String email = principal.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND + email));
     }
 
     private void initializeRoles(User user) {
-        if (user != null && user.getRoles() != null) {
-            user.getRoles().size(); // Initializing roles collection
-        }
+        Optional.ofNullable(user)
+                .ifPresent(u -> u.getRoles().size()); // Initializing roles collection
     }
 
     private User saveUser(User user) {
         try {
             LOG.info("Saving/updating user with email: " + user.getEmail());
-            return userRepository.save(user);
+            return Optional.ofNullable(user)
+                    .map(userRepository::save)
+                    .orElseThrow(() -> new RuntimeException("User could not be saved. Please try again."));
         } catch (Exception e) {
             LOG.error("Error during saving/updating", e);
             throw new RuntimeException("User could not be saved. Please try again.");
         }
     }
+
+    // -----------------------------------------------
 
     private void validatePasswords(ChangePasswordRequest changePasswordRequest, User user) {
         if (!bCryptPasswordEncoder.matches(changePasswordRequest.oldPassword(), user.getPassword())) {
@@ -198,17 +218,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User mapSignupRequestToUser(SignupRequest signupRequest) {
-        User user = new User();
-        user.setEmail(signupRequest.email());
-        user.setUsername(signupRequest.username());
-        user.setLastname(signupRequest.lastname());
-        user.setPassword(bCryptPasswordEncoder.encode(signupRequest.password()));
-        user.getRoles().add(ERole.ROLE_USER);
-        return user;
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(TOKEN_NOT_FOUND));
     }
-
-    // -----------------------------------------------
-
-    // -----------------------------------------------
 }
