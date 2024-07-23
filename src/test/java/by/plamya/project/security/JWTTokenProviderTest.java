@@ -42,7 +42,6 @@ public class JWTTokenProviderTest {
     }
 
     @DisplayName("Тест валидации токена")
-
     // @Disabled
     @Test
     public void validateTokenTest() {

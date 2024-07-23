@@ -13,7 +13,8 @@ public record SignupRequest(
                 @NotEmpty(message = "Вы пропустили Имя") String firstname,
                 @NotEmpty(message = "Вы пропустили Фамилию") String lastname,
                 @NotEmpty(message = "Вы пропустили номер телефона") String phone,
-                @NotEmpty(message = "Вы пропустили Пароль") @Size(min = 6) String password, String confirmPassword)
+                @NotEmpty(message = "Вы пропустили Пароль") @Size(min = 6) String password,
+                String confirmPassword)
                 implements PasswordMatchable {
 
         @Override
