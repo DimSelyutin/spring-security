@@ -43,7 +43,7 @@ public class User implements UserDetails {
     @Column(nullable = true, updatable = true)
     private String lastname;
 
-    @Column(nullable = false, updatable = true)
+    @Column(nullable = true, updatable = true)
     private String phone;
 
     @Column(nullable = true, updatable = true)

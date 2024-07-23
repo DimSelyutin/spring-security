@@ -1,5 +1,7 @@
 package by.plamya.project.service.impl;
 
+import java.security.AuthProvider;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,7 @@ import by.plamya.project.payload.request.LoginRequest;
 import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.security.JWTTokenProvider;
+import by.plamya.project.security.oauth.OAuth2UserInfo;
 import by.plamya.project.service.AuthenticationService;
 import by.plamya.project.service.EmailService;
 import by.plamya.project.service.ResetTokenService;
@@ -145,6 +148,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userService.changeUserPassword(user, passwordDTO.getNewPassword());
         resetTokenService.deleteToken(passwordDTO.getToken());
         return result;
+    }
+
+    @Override
+    @Transactional
+    public User registerOauth2User(String provider, OAuth2UserInfo oAuth2UserInfo) {
+        User user = new User();
+        user.setEmail(oAuth2UserInfo.getEmail());
+        user.setFirstname(oAuth2UserInfo.getFirstName());
+        user.setFirstname(oAuth2UserInfo.getLastName());
+        user.setActive(1);
+        user.setRoles(Collections.singleton(ERole.ROLE_USER));
+        // user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateOauth2User(User user, String provider, OAuth2UserInfo oAuth2UserInfo) {
+        user.setFirstname(oAuth2UserInfo.getFirstName());
+        user.setFirstname(oAuth2UserInfo.getLastName());
+        user.setEmail(oAuth2UserInfo.getEmail());
+
+        // user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
+        return userRepository.save(user);
     }
 
     private User mapSignupRequestToUser(SignupRequest signupRequest) {

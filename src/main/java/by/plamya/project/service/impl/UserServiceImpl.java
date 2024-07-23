@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,29 +17,26 @@ import by.plamya.project.entity.PasswordResetToken;
 import by.plamya.project.entity.User;
 import by.plamya.project.exceptions.ResetTokenException;
 import by.plamya.project.exceptions.UserNotFoundException;
+import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.ChangePasswordRequest;
 import by.plamya.project.repository.PasswordTokenRepository;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.service.UserService;
 import by.plamya.project.utils.enums.ERole;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private static final String TOKEN_NOT_FOUND = "Token not found";
     private static final String USERNAME_NOT_FOUND = "Username not found with username ";
 
-    private UserRepository userRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private PasswordTokenRepository passwordTokenRepository;
-
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
-            PasswordTokenRepository passwordTokenRepository) {
-        this.userRepository = userRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.passwordTokenRepository = passwordTokenRepository;
-    }
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordTokenRepository passwordTokenRepository;
+    private final UserFacade userFacade;
 
     @Override
     public User getUserById(Long id) {
@@ -143,8 +141,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        List<UserDTO> users = userRepository.findAll().stream().map(userFacade::userToUserDTO)
+                .collect(Collectors.toList());
+
+        return users;
     }
 
     @Override
@@ -175,6 +176,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public Optional<User> getUserInfo(String email) {
+        return userRepository.findByEmail(email);
+    }
     /*
      * Utility methods
      */
@@ -213,4 +218,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(TOKEN_NOT_FOUND));
+    }
 }

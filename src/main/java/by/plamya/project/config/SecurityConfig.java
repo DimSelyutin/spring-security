@@ -22,30 +22,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import by.plamya.project.security.JWTAuthenticationEntryPoint;
 import by.plamya.project.security.JWTAuthenticationFilter;
 import by.plamya.project.security.oauth.OAuth2SuccessHandler;
+
 import by.plamya.project.service.impl.CustomUserDetailsService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, proxyTargetClass = true)
+@AllArgsConstructor
 public class SecurityConfig {
 
     private JWTAuthenticationFilter jwtAuthenticationFilter;
     private JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private CustomUserDetailsService customUserDetailsService;
-    private OAuth2SuccessHandler oAuth2SuccessHandler;
-    private ClientRegistrationRepository сlientRegistrationRepository;
 
-    public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter,
-            JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint, CustomUserDetailsService customUserDetailsService,
-            OAuth2SuccessHandler oAuth2SuccessHandler, ClientRegistrationRepository сlientRegistrationRepository) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.customUserDetailsService = customUserDetailsService;
-        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-        this.сlientRegistrationRepository = сlientRegistrationRepository;
-    }
+    private CustomUserDetailsService customUserDetailsService;
+
+    private ClientRegistrationRepository сlientRegistrationRepository;
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     // Configuring HttpSecurity
     @Bean
@@ -55,7 +50,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> {
-                    
+
                     auth.requestMatchers("/api/auth/**", "/oauth2/**").permitAll();
                     auth.requestMatchers("/api/admin/**").hasAnyRole("ADMIN",
                             "INSTRUCTOR");
