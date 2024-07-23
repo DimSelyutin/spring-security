@@ -30,7 +30,7 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 	implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: '6.3.1'
 
-	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.3.1'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.3.2'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.2.4'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
 	// JWT
