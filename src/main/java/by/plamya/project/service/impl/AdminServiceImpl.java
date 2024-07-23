@@ -15,7 +15,6 @@ import by.plamya.project.payload.request.UpdateUserRequest;
 import by.plamya.project.repository.UserRepository;
 import by.plamya.project.service.AdminService;
 import by.plamya.project.utils.enums.ERole;
-import io.jsonwebtoken.lang.Collections;
 import lombok.Data;
 
 @Service

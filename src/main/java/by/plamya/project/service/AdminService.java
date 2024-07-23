@@ -3,7 +3,6 @@ package by.plamya.project.service;
 import java.util.List;
 
 import by.plamya.project.dto.UserDTO;
-import by.plamya.project.entity.User;
 import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.payload.request.UpdateUserRequest;
 

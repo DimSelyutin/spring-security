@@ -68,8 +68,6 @@ public class JWTTokenProviderTest {
         // Создание объекта JWTTokenProvider
         JWTTokenProvider tokenProvider = new JWTTokenProvider();
         String validToken = tokenProvider.generateToken(user);
-        // String validToken =
-        // "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiaWQiOiIxIiwiZW1haWwiOiJkaW1rYTJAbWFpbC5ydSIsInVzZXJuYW1lIjoidmFudXNoa2EyIiwibGFzdG5hbWUiOm51bGwsImlhdCI6MTcxODU2MDkxNSwiZXhwIjoxNzE4NTYxNTE1fQ.FHSzCcNzsbJILpyIiL8g1YlqrXGK9muQ2BEEeo0TzryNrfk6Co4eL7ISWS7VitEeQTgcK-vlmWY5l8c5aqHeoQ";
 
         Long userId = tokenProvider.getUserIdFromToken(validToken);
 

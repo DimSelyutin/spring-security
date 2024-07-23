@@ -2,7 +2,6 @@ package by.plamya.project.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
@@ -10,15 +9,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import by.plamya.project.dto.UserDTO;
-import by.plamya.project.entity.User;
-import by.plamya.project.facade.UserFacade;
 import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.payload.request.UpdateUserRequest;
 import by.plamya.project.payload.response.MessageResponse;
 import by.plamya.project.service.AdminService;
 import by.plamya.project.utils.validations.ResponseErrorValidator;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 
 @CrossOrigin
 @RestController

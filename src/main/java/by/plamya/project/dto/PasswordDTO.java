@@ -1,6 +1,5 @@
 package by.plamya.project.dto;
 
-import by.plamya.project.utils.annotations.ValidPassword;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 

@@ -21,12 +21,6 @@ public @interface ValidEmail {
 
     Class<? extends Payload>[] payload()default{};
 
-    // int min() default 0; // атрибут для минимальной длины email адреса
 
-    // int max() default Integer.MAX_VALUE; // Добавляем атрибут для максимальной
-    // длины email адреса
-
-    // boolean allowLocal() default false; // атрибут для разрешения локальных
-    // адресов (например, user@localhost)
 
 }

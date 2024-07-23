@@ -1,8 +1,6 @@
 package by.plamya.project.utils.validations;
 
-import by.plamya.project.payload.request.ChangePasswordRequest;
 import by.plamya.project.payload.request.PasswordMatchable;
-import by.plamya.project.payload.request.SignupRequest;
 import by.plamya.project.utils.annotations.PasswordMatches;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
