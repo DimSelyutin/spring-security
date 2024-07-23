@@ -12,37 +12,30 @@ Plamya Spring Project - это пет-проект, использующий Spr
 plamya-spring/
 ├── src/
 │   ├── main/
-│   │   ├── java/
-│   │   │   └── by/
-│   │   │       └── plamya/
-│   │   │           └── project/
-│   │   │               ├── config/
-│   │   │               ├── controller/
-│   │   │               ├── dto/
-│   │   │               ├── entity/
-│   │   │               ├── exceptions/
-│   │   │               ├── facade/
-│   │   │               ├── payload/
-│   │   │               │   ├── request/
-│   │   │               │   └── response/
-│   │   │               ├── repository/
-│   │   │               ├── security/
-│   │   │               │    └── oauth/
-│   │   │               ├── service/
-│    |  |              |     └── impl/
-│    |  |              |
-│    |  |              ├── utils/
-│    |  |              |    ├── annotations/
-|    |  |              |    ├── constants/ 
-|    |  |              |    ├── enums/ 
-|    |  |              |    └── validations/ 
-|    |  |
-|    |  |
-|    |  |
-|    |  |
-|    |
-|     ......
-|
+│   │  ├── java/
+│   │  │   └── by/
+│   │  │       └── plamya/
+│   │  │           └── project/
+│   │  │               ├── config/
+│   │  │               ├── controller/
+│   │  │               ├── dto/
+│   │  │               ├── entity/
+│   │  │               ├── exceptions/
+│   │  │               ├── facade/
+│   │  │               ├── payload/
+│   │  │               │   ├── request/
+│   │  │               │   └── response/
+│   │  │               ├── repository/
+│   │  │               ├── security/
+│   │  │               │    └── oauth/
+│   │  │               ├── service/
+│   |  |               |     └── impl/
+│   |  |               |
+│   |  |               ├── utils/
+│   |  |               |    ├── annotations/
+|   |  |               |    ├── constants/ 
+|   |  |               |    ├── enums/ 
+|   |  |               |    └── validations/                           
 ├── test/
 |      ......
 ```
